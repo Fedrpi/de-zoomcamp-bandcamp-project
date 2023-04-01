@@ -1,0 +1,134 @@
+version: 2
+
+sources:
+  - name: staging
+    database: disco-bedrock-375516
+    schema: bandcamp
+    tables:
+      - name: artist
+      - name: album
+      - name: release
+      - name: record
+
+models:
+    - name: stg_bc_artist
+      description: All bandcamp artists albums stored in research dataset
+      columns:
+          - name: id
+            description: >
+                Primary key for this table
+                In fact this is the link to artist page
+            tests:
+                - unique:
+                    severity: warn
+                - not_null:
+                    severity: warn
+          - name: name 
+            description: Artist name
+            tests:
+                - unique:
+                    severity: warn
+                - not_null:
+                    severity: warn
+          - name: genre 
+            description: Main musical genre of the artist
+
+    - name: stg_bc_album
+      description: All bandcamp artists albums stored in research dataset
+      columns:
+          - name: id
+            description: >
+                Primary key for this table
+                In fact this is the link to album page
+            tests:
+                - unique:
+                    severity: warn
+                - not_null:
+                    severity: warn
+          - name: artist_id 
+            description: > 
+                Foreign key to artist
+            tests:
+              - relationships:
+                  to: source('stg', 'artist')
+                  field: id
+                  severity: warn
+          - name: name 
+            description: Album name
+            tests:
+                - unique:
+                    severity: warn
+                - not_null:
+                    severity: warn
+          - name: num_tracks 
+            description: Count of tracks in album
+          - name: keywords 
+            description: >
+                List of genres that describe an album.
+                Writes by artist
+          - name: date_published 
+            description: Date when artist publish album on bandcamp
+          - name: date_modified 
+
+    - name: stg_bc_release
+      description: >
+          List of album releases Digital, CD, Vinyl, Tape, etc
+          Also releases can be some artist merch like t-shirt, live dvd, etc
+      columns:
+          - name: id
+            description: >
+                Primary key for this table
+                In fact link to albums release page
+            tests:
+                - unique:
+                    severity: warn
+                - not_null:
+                    severity: warn
+          - name: album_id 
+            description: Foreign key to album
+            tests:
+              - relationships:
+                  to: source('stg', 'album')
+                  field: id
+                  severity: warn
+          - name: name
+            description: Name of release
+          - name: format 
+            description: Release format
+            # add test to list of available formats
+          - name: price 
+            description: Price of release
+          - name: currency 
+            description: Currency of price
+          - name: availability 
+            description: >
+                Is release available to order or SoldOut
+                Online releases always available to order
+          - name: release_type
+            description: Release or merch
+
+    - name: stg_bc_track
+      description: List of album tracks
+      columns:
+          - name: id
+            description: >
+                Primary key for this table
+                In fact link to albums track page
+            tests:
+                - unique:
+                    severity: warn
+                - not_null:
+                    severity: warn
+          - name: album_id 
+            description: Foreign key to album
+            tests:
+              - relationships:
+                  to: source('stg', 'album')
+                  field: id
+                  severity: warn
+          - name: name
+            description: Name of track
+          - name: duration 
+            description: Duration of track in minutes
+          - name: position 
+            description: Position of track in album

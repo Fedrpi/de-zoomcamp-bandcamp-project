@@ -1,0 +1,16 @@
+version: 2
+
+models:
+    - name: fact_music_genres
+      description: Bandcamp music genres statistic
+      columns:
+          - name: date_published
+            description: Date when album was punlished to bandcamp
+          - name: genre 
+            description: Genre name
+          - name: total_artists 
+            description: Number of artist
+          - name: total_albums 
+            description: Number of albums
+          - name: mean_song_duration
+            description: Mean duration of song in minutes
