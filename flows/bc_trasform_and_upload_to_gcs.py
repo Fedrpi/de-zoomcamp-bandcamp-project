@@ -7,22 +7,24 @@ from config import *
 from pathlib import Path
 from prefect import flow, task
 from prefect.filesystems import GCS
-from prefect_gcp.cloud_storage import GcsBucket
 from prefect_shell import ShellOperation
 from prefect_gcp import GcpCredentials
 
 
 @task(log_prints=True)
-def download_data_from_gcs(local_path:str, bucket:str, file_name:str) -> None:
-    print(f'load data from gcs gs://{bucket}/{file_name}')
-    ShellOperation(
-        commands=[
-            "gcloud auth activate-service-account --key-file /Users/fdr/SqlProjects/Datatalks/keys/dbt-disco-bedrock-375516-391dce4a8b2b.json",
-            "mkdir -p ${local_path}",
-            "gcloud storage cp gs://${bucket}/${file_name} ${local_path}"
-        ],
-        env={"local_path": local_path, "bucket": bucket, "file_name": file_name}
-    ).run()
+def download_data_from_gcs(obj_path:str, obj_name:str) -> str:
+    """Load raw file from gcs bucket
+
+    :param str obj_path: path to file in bucket
+    :param str obj_name: file name in bucket
+    :return str: path to file in local folder
+    """
+    gcs_block = GcsBucket.load("bandcamp-lake")
+    print(f'Load {obj_name} from {obj_path}')
+    Path(f"{obj_path}").mkdir(parents=True, exist_ok=True)    
+    gcs_block.download_object_to_path(from_path=f'{obj_path}/{obj_name}', 
+                                      to_path=f'{obj_path}/{obj_name}')
+    return
 
 @task(log_prints=True)
 def unzip_archive(local_path:str, file_name:str) -> None:
@@ -30,7 +32,7 @@ def unzip_archive(local_path:str, file_name:str) -> None:
     ShellOperation(
         commands=[
             "unzip -d ${local_path} ${local_path}${file_name}",
-            "rm ${local_path}${file_name}"
+            # "rm ${local_path}${file_name}"
         ],
         env={"local_path": local_path, "file_name": file_name}
     ).run()
@@ -49,7 +51,7 @@ def get_main_df(path):
 @task(log_prints=True)
 def calc_artist_df(main_df):
     print('trasform artists')
-    gcp_credentials_block = GcpCredentials.load("zoom-gcp-creds")
+    gcp_credentials_block = GcpCredentials.load("bandcamp-gcp-creds")
     artist_df = pd.DataFrame()
     artist_df['data'] = main_df.apply(get_data, 
                                       field='byArtist', 
@@ -66,7 +68,7 @@ def calc_artist_df(main_df):
     print('load artists')
     artist_df.to_gbq(
         destination_table="bandcamp.artist",
-        project_id="disco-bedrock-375516",
+        project_id="dtc-bandcamp-ff",
         credentials=gcp_credentials_block.get_credentials_from_service_account(),
         chunksize=500_000,
         location="europe-west6",
@@ -76,7 +78,7 @@ def calc_artist_df(main_df):
 @task(log_prints=True)
 def calc_release_df(main_df):
     print('trasform release')
-    gcp_credentials_block = GcpCredentials.load("zoom-gcp-creds")
+    gcp_credentials_block = GcpCredentials.load("bandcamp-gcp-creds")
     release_df = pd.DataFrame()
     release_df['data'] = main_df.apply(get_data_list, 
                                        field='albumRelease', 
@@ -93,7 +95,7 @@ def calc_release_df(main_df):
     print('load release')
     release_df.to_gbq(
         destination_table="bandcamp.release",
-        project_id="disco-bedrock-375516",
+        project_id="dtc-bandcamp-ff",
         credentials=gcp_credentials_block.get_credentials_from_service_account(),
         chunksize=500_000,
         location="europe-west6",
@@ -103,7 +105,7 @@ def calc_release_df(main_df):
 @task(log_prints=True)
 def calc_record_df(main_df):
     print('transform record')
-    gcp_credentials_block = GcpCredentials.load("zoom-gcp-creds")
+    gcp_credentials_block = GcpCredentials.load("bandcamp-gcp-creds")
     record_df = pd.DataFrame()
     record_df['data'] = main_df['track'].apply(get_data_list, 
                                                field='itemListElement', 
@@ -118,7 +120,7 @@ def calc_record_df(main_df):
     print('load record')
     record_df.to_gbq(
         destination_table="bandcamp.record",
-        project_id="disco-bedrock-375516",
+        project_id="dtc-bandcamp-ff",
         credentials=gcp_credentials_block.get_credentials_from_service_account(),
         chunksize=500_000,
         location="europe-west6",
@@ -128,7 +130,7 @@ def calc_record_df(main_df):
 @task(log_prints=True)
 def calc_album_df(main_df):
     print('transform album')
-    gcp_credentials_block = GcpCredentials.load("zoom-gcp-creds")
+    gcp_credentials_block = GcpCredentials.load("bandcamp-gcp-creds")
     album_df = main_df.copy()
     album_df.drop(columns=['byArtist', 
                            'albumRelease', 
@@ -155,7 +157,7 @@ def calc_album_df(main_df):
     print('load album')
     album_df.to_gbq(
         destination_table="bandcamp.album",
-        project_id="disco-bedrock-375516",
+        project_id="dtc-bandcamp-ff",
         credentials=gcp_credentials_block.get_credentials_from_service_account(),
         chunksize=500_000,
         location="europe-west6",
@@ -170,20 +172,20 @@ def flow_orchestrator(local_path:str, bucket:str, file_name:str) -> None:
     :param str dataset_file: name of file with data
     :param str data_path: path to save file
     """
-    # download_data_from_gcs(local_path, bucket, file_name)
-    # unzip_archive(local_path, file_name)
+    download_data_from_gcs(local_path, file_name)
+    unzip_archive(local_path, file_name)
     for dirpath, dirnames, filenames in os.walk(local_path):
         for filename in filenames:
             if filename.endswith('.json'):
                 file_path = os.path.join(dirpath, filename)
                 df = get_main_df(file_path)
                 calc_artist_df(df)
-                # calc_release_df(df)
-                # calc_record_df(df)
+                calc_release_df(df)
+                calc_record_df(df)
                 calc_album_df(df)
 
 if __name__ == "__main__":
-    local_path = './data/bc/'
+    local_path = './data/'
     file_name = 'bandcamp.zip'
-    bucket = 'bandcamp-disco-bedrock-375516'
+    bucket = 'raw-data-dtc-bandcamp-ff'
     flow_orchestrator(local_path, bucket, file_name)

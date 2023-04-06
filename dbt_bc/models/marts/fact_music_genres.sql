@@ -42,7 +42,7 @@ df as (
    ,m.id merch_id
   from artists ar
   left join albums al
-         on ar.id = al.id
+         on ar.id = al.artist_id
   left join tracks tr
          on al.id = tr.album_id
   left join merch m
@@ -52,10 +52,10 @@ df as (
 result as (
   select
     genre
-   ,count(artist_id) total_artists
-   ,count(album_id) total_albums
+   ,count(distinct artist_id) total_artists
+   ,count(distinct album_id) total_albums
    ,avg(duration) song_mean_duraton
-   ,count(merch_id) total_merch
+   ,count(distinct merch_id) total_merch
   from df
   group by 1
 )

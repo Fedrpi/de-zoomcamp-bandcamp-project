@@ -2,3 +2,6 @@ spark
 logs
 data
 __pycache__**
+.env
+keys
+edr_target**

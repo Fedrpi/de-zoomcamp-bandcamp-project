@@ -39,7 +39,7 @@ services:
   agent:
     image: prefecthq/prefect:2.8.0-python3.11
     restart: always
-    entrypoint: ["prefect", "agent", "start", "-q", "YOUR_WORK_QUEUE_NAME"]
+    entrypoint: ["prefect", "agent", "start", "-q", "default"]
     environment:
       - PREFECT_API_URL=http://server:4200/api
     networks:
@@ -53,6 +53,8 @@ services:
     working_dir: "/root/"
     volumes:
       - "./flows:/root/flows"
+      - "./keys:/root/keys"
+      - "./dbt_bc:/root/dbt_bc"
     environment:
       - PREFECT_API_URL=http://server:4200/api
     networks:
@@ -95,13 +97,13 @@ services:
   dbt-docs:
     image: ghcr.io/dbt-labs/dbt-bigquery:1.4.0
     volumes:
-      - ~/de-zoomcamp-2023/dbt/de_zoomcamp:/root/dbt/de_zoomcamp
-      - ~/dbt_profiles:/root/.dbt
-    working_dir: /root/dbt/de_zoomcamp
+      - "./dbt_bc:/root/dbt_bc"
+      - "./keys:/root/keys"
+    working_dir: /root/dbt_bc/
     environment:
-      - DBT_PROFILES_DIR=/root/.dbt
-      - DBT_PROFILE=de-zoomcamp
-      - DBT_PROJECT_DIR=/root/dbt/de_zoomcamp
+      - DBT_PROFILES_DIR=/root/keys
+      - DBT_PROFILE=dbt_bandcamp
+      - DBT_PROJECT_DIR=/root/dbt_bc
     ports:
       - 8080:8080
     entrypoint: ["dbt", "docs", "serve"]
@@ -111,7 +113,7 @@ services:
   dbt-elementary:
     image: nginx:alpine
     volumes:
-      - "./dbt/de_zoomcamp/elementary:/usr/share/nginx/html"
+      - "./dbt_bc/elementary_report:/usr/share/nginx/html"
     ports:
       - 8081:80
     profiles: ["dbt-elementary"]
