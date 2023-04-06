@@ -2,7 +2,7 @@ version: 2
 
 sources:
   - name: staging
-    database: disco-bedrock-375516
+    database: dtc-bandcamp-ff
     schema: bandcamp
     tables:
       - name: artist
@@ -50,7 +50,7 @@ models:
                 Foreign key to artist
             tests:
               - relationships:
-                  to: source('stg', 'artist')
+                  to: ref("stg_bc_artist")
                   field: id
                   severity: warn
           - name: name 
@@ -88,7 +88,7 @@ models:
             description: Foreign key to album
             tests:
               - relationships:
-                  to: source('stg', 'album')
+                  to: ref("stg_bc_album")
                   field: id
                   severity: warn
           - name: name
@@ -123,7 +123,7 @@ models:
             description: Foreign key to album
             tests:
               - relationships:
-                  to: source('stg', 'album')
+                  to: ref("stg_bc_album")
                   field: id
                   severity: warn
           - name: name

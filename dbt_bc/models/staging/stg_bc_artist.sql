@@ -4,6 +4,7 @@
     )
 }}
 select 
+distinct
     id
    ,name
    ,case 
@@ -11,6 +12,7 @@ select
       else Null
     end genre
 from {{ source('staging', 'artist') }}
+where genre_tag is not null
 {% if var('is_test_run', default=true) %}
 limit 1000
 {% endif %}
