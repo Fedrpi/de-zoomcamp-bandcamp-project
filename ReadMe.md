@@ -14,14 +14,14 @@ Architecture of project consist of next elements:
 | [Metabase](https://www.metabase.com/) | BI Tool |
 
 ## Schema
-
+![Shema](docs/img/bandcamp_arhitecture.jpg)
 
 
 ## IAAS Terraform
 Project developed on GCP infrastructure that managed by Terraform
 To reproduce steps of creating infrastructure follow this [documentation](/docs/terraform.md)
 
-## Solution
+## Project Solution
 Solution is packed to docker containers to install it follow this [documentation]
 [Dbt-Docs](http://34.65.65.19:8080/)
 [Elementary-data](http://34.65.65.19:8081/#/report/dashboard)
@@ -35,5 +35,7 @@ Final dashboard shows bandcamp statictic in musical genres scope:
 - Barchart with total artists by genre
 - Barchart with mean song duration by genre
 - Barchart with total merch by genre
+
+![Sample](docs/img/bandcamp_dashboard.png)
 
 Click [here](http://34.65.65.19:3000/public/dashboard/75bc9e51-ef8b-472a-a954-087eb8317956) to view bandcamp statistic dashboard
