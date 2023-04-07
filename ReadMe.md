@@ -3,8 +3,8 @@
 The Bandcamp resource data analysis project focuses on collecting data from the Bandcamp platform and performing an analysis of musical genres. The project involves data engineering techniques such as data cleaning, data integration, and data transformation. The data collected will be used to gain insights into the popularity of different music genres on the Bandcamp platform. The analysis will include the classification of music genres, identification of popular genres, and trends. The ultimate goal of the project is to provide valuable insights to music enthusiasts and industry professionals.
 
 # Data
-Dataset for this project created by components.one https://components.one/datasets/bandcamp-items
-Check out they research and map of musical genres https://components.one/posts/map-and-category-bandcamp
+Dataset for this project created by components.one https://components.one/datasets/bandcamp-items  
+Check out their research and map of musical genres https://components.one/posts/map-and-category-bandcamp
 
 # Architecture
 Architecture of project consist of next elements:
