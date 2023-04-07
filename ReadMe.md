@@ -18,7 +18,7 @@ Architecture of project consist of next elements:
 | [Metabase](https://www.metabase.com/) | BI Tool |
 
 ## Schema
-![Shema](docs/img/bandcamp_arhitecture.jpg)
+![Shema](docs/img/bandcamp_architecture.jpg)
 
 
 ## IAAS Terraform
