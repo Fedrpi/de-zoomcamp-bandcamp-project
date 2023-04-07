@@ -26,9 +26,9 @@ Project developed on GCP infrastructure that managed by Terraform
 To reproduce steps of creating infrastructure follow this [documentation](/docs/terraform.md)
 
 ## Project Solution
-Solution is packed to docker containers to install it follow this [documentation]
-[Dbt-Docs](http://34.65.65.19:8080/)
-[Elementary-data](http://34.65.65.19:8081/#/report/dashboard)
+Solution is packed to docker containers to install it follow this [documentation](/docs/solution.md)  
+View [Dbt-Docs](http://34.65.65.19:8080/)  
+View [Elementary data observability](http://34.65.65.19:8081/#/report/dashboard)  
 
 # Dashboard
 
